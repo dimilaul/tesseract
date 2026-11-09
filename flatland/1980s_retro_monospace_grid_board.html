@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1980s Retro Monospace Grid Board (80x40)</title>
+    <!-- Tailwind CSS for modern responsive wrapper and control styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Press+Start+2P&display=swap');
+
+        /* Custom Retro Styling & CRT Effects */
+        body {
+            background-color: #0d0e15;
+            color: #d1d5db;
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+        }
+
+        .retro-title {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        /* CRT Container Frame */
+        .crt-frame {
+            position: relative;
+            background: #181922;
+            border: 12px solid #282a36;
+            border-radius: 20px;
+            box-shadow: 
+                0 0 0 2px #0f1016,
+                0 15px 35px rgba(0, 0, 0, 0.8),
+                inset 0 0 15px rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+        }
+
+        /* Scanlines Overlay */
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.35) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        /* Screen Curved Glass Effect & Vignette */
+        .crt-glass {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.03) 0%,
+                rgba(0, 0, 0, 0.2) 70%,
+                rgba(0, 0, 0, 0.65) 100%
+            );
+            z-index: 11;
+            pointer-events: none;
+        }
+
+        /* Subtle Screen Flicker */
+        @keyframes flicker {
+            0% { opacity: 0.985; }
+            50% { opacity: 1; }
+            100% { opacity: 0.99; }
+        }
+        .crt-screen-container {
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Custom Color Swatch Buttons */
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s;
+        }
+        .color-swatch:hover {
+            transform: scale(1.15);
+            border-color: #ffffff;
+        }
+
+        /* Retro Arcade Control Panel Styling */
+        .arcade-panel {
+            background: #14161f;
+            border: 2px solid #2d3142;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .arcade-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            transition: all 0.08s ease-in-out;
+            box-shadow: 0 4px 0 #1b1e2e;
+        }
+        .arcade-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1b1e2e;
+        }
+
+        /* Custom Scrollbar for code block */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111218;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-6">
+
+    <!-- Header Section -->
+    <header class="max-w-7xl w-full mx-auto mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-xl md:text-2xl font-bold retro-title text-green-400 tracking-wider flex items-center gap-3">
+                <span class="inline-block w-4 h-4 bg-green-500 rounded-full animate-pulse"></span>
+                RETRO-GRID 80x40
+            </h1>
+            <p class="text-xs text-gray-400 mt-1">1980s Terminal & Monospace Display Buffer Matrix</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs bg-gray-800 text-green-400 px-3 py-1.5 rounded font-mono border border-green-500/30">
+                Resolution: 80 × 40 Cells
+            </span>
+            <span class="text-xs bg-gray-800 text-amber-400 px-3 py-1.5 rounded font-mono border border-amber-500/30">
+                API Ready: <code class="text-white">window.RetroBoard</code>
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+        
+        <!-- Left Column: Retro Canvas CRT Monitor Display (Span 7) -->
+        <section class="lg:col-span-7 flex flex-col items-center w-full">
+            <div class="crt-frame w-full max-w-full p-2 sm:p-4">
+                <div class="crt-screen-container relative w-full overflow-hidden rounded bg-black flex justify-center items-center">
+                    <!-- Overlay Effects -->
+                    <div class="scanlines"></div>
+                    <div class="crt-glass"></div>
+                    
+                    <!-- Monospace Grid Canvas -->
+                    <canvas id="retroCanvas" class="block w-full h-auto max-w-full cursor-crosshair"></canvas>
+                </div>
+            </div>
+
+            <!-- Canvas Info Bar -->
+            <div class="w-full flex justify-between items-center text-xs text-gray-400 mt-2 px-2 font-mono">
+                <div id="hoverCoords">Cursor: (x: --, y: --)</div>
+                <div id="fpsCounter" class="text-green-500">60 FPS</div>
+            </div>
+        </section>
+
+        <!-- Right Column: Interactive Test Form & Arcade Controls (Span 5) -->
+        <section class="lg:col-span-5 flex flex-col gap-5 w-full">
+            
+            <!-- Manual Input Test Form -->
+            <div class="arcade-panel p-5 rounded-xl border border-gray-700">
+                <h2 class="text-sm font-bold retro-title text-amber-400 mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    CELL CONTROLLER
+                </h2>
+
+                <form id="cellForm" onsubmit="event.preventDefault(); submitCellForm();" class="space-y-4">
+                    <!-- X & Y Position Controls -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">X Pos (0 - 79)</label>
+                            <input type="number" id="inputX" min="0" max="79" value="40" 
+                                class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-green-400 font-mono text-sm focus:outline-none focus:border-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Y Pos (0 - 39)</label>
+                            <input type="number" id="inputY" min="0" max="39" value="20" 
+                                class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-green-400 font-mono text-sm focus:outline-none focus:border-green-500">
+                        </div>
+                    </div>
+
+                    <!-- ASCII Symbol Input + Presets -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">ASCII Symbol (Single Char)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inputChar" maxlength="1" value="@" 
+                                class="w-16 text-center bg-gray-900 border border-gray-700 rounded px-3 py-2 text-yellow-400 font-mono font-bold text-lg focus:outline-none focus:border-yellow-500">
+                            
+                            <!-- Quick Symbol Presets -->
+                            <div class="flex flex-wrap gap-1 items-center flex-1 bg-gray-900/60 p-1.5 rounded border border-gray-800">
+                                <button type="button" onclick="setCharPreset('@')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">@</button>
+                                <button type="button" onclick="setCharPreset('#')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">#</button>
+                                <button type="button" onclick="setCharPreset('$')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">$</button>
+                                <button type="button" onclick="setCharPreset('*')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">*</button>
+                                <button type="button" onclick="setCharPreset('A')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">A</button>
+                                <button type="button" onclick="setCharPreset('█')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">█</button>
+                                <button type="button" onclick="setCharPreset('▒')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs rounded text-gray-200">▒</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Foreground & Background Colors -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Foreground Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="inputFg" value="#33ff33" class="w-10 h-9 bg-gray-900 border border-gray-700 rounded cursor-pointer">
+                                <input type="text" id="inputFgText" value="#33ff33" class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-xs font-mono text-gray-300">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Background Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="inputBg" value="#000000" class="w-10 h-9 bg-gray-900 border border-gray-700 rounded cursor-pointer">
+                                <input type="text" id="inputBgText" value="#000000" class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-xs font-mono text-gray-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Color Swatches -->
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1.5">Retro Swatches (Sets FG):</label>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="setFgSwatch('#33ff33')" class="color-swatch bg-[#33ff33]" title="Green"></button>
+                            <button type="button" onclick="setFgSwatch('#ffb000')" class="color-swatch bg-[#ffb000]" title="Amber"></button>
+                            <button type="button" onclick="setFgSwatch('#00e5ff')" class="color-swatch bg-[#00e5ff]" title="Cyan"></button>
+                            <button type="button" onclick="setFgSwatch('#ff0055')" class="color-swatch bg-[#ff0055]" title="Magenta"></button>
+                            <button type="button" onclick="setFgSwatch('#ffff55')" class="color-swatch bg-[#ffff55]" title="Yellow"></button>
+                            <button type="button" onclick="setFgSwatch('#ff3333')" class="color-swatch bg-[#ff3333]" title="Red"></button>
+                            <button type="button" onclick="setFgSwatch('#ffffff')" class="color-swatch bg-[#ffffff]" title="White"></button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 flex gap-3">
+                        <button type="submit" class="flex-1 arcade-btn bg-green-600 hover:bg-green-500 text-black py-2.5 px-4 rounded font-bold border border-green-400">
+                            SET CELL
+                        </button>
+                        <button type="button" onclick="RetroBoard.clear()" class="arcade-btn bg-gray-800 hover:bg-gray-700 text-gray-300 py-2.5 px-4 rounded border border-gray-600">
+                            CLEAR
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preset Demos Panel -->
+            <div class="arcade-panel p-5 rounded-xl border border-gray-700">
+                <h2 class="text-sm font-bold retro-title text-cyan-400 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    DEMO PRESETS
+                </h2>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="runTitleDemo()" class="arcade-btn bg-indigo-900 hover:bg-indigo-800 text-indigo-200 py-2 px-3 rounded text-left border border-indigo-700">
+                        1. Retro Banner
+                    </button>
+                    <button onclick="startMatrixDemo()" class="arcade-btn bg-emerald-900 hover:bg-emerald-800 text-emerald-200 py-2 px-3 rounded text-left border border-emerald-700">
+                        2. Matrix Rain
+                    </button>
+                    <button onclick="runRoguelikeDemo()" class="arcade-btn bg-amber-900 hover:bg-amber-800 text-amber-200 py-2 px-3 rounded text-left border border-amber-700">
+                        3. Roguelike Map
+                    </button>
+                    <button onclick="runSpectrumDemo()" class="arcade-btn bg-fuchsia-900 hover:bg-fuchsia-800 text-fuchsia-200 py-2 px-3 rounded text-left border border-fuchsia-700">
+                        4. Color Spectrum
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Console Usage Guide -->
+            <div class="arcade-panel p-4 rounded-xl border border-gray-700 text-xs">
+                <h3 class="font-bold text-gray-300 mb-2 flex items-center justify-between">
+                    <span>DEVELOPER API GUIDE</span>
+                    <span class="text-[10px] text-gray-500">Open Browser Console (F12)</span>
+                </h3>
+                <pre class="bg-black p-3 rounded text-green-400 overflow-x-auto font-mono text-[11px] leading-relaxed border border-gray-800">
+<span class="text-gray-500">// Example Developer Console Commands:</span>
+<span class="text-yellow-300">RetroBoard</span>.setCell(<span class="text-cyan-300">10</span>, <span class="text-cyan-300">5</span>, <span class="text-amber-300">'@'</span>, <span class="text-amber-300">'#ffb000'</span>, <span class="text-amber-300">'#000'</span>);
+<span class="text-yellow-300">RetroBoard</span>.writeText(<span class="text-cyan-300">2</span>, <span class="text-cyan-300">2</span>, <span class="text-amber-300">"HELLO 1980s WORLD"</span>, <span class="text-amber-300">'#00e5ff'</span>);
+<span class="text-yellow-300">RetroBoard</span>.fill(<span class="text-amber-300">'.'</span>, <span class="text-amber-300">'#223322'</span>);
+<span class="text-yellow-300">RetroBoard</span>.clear();</pre>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl w-full mx-auto mt-8 text-center text-xs text-gray-600 border-t border-gray-900 pt-4">
+        1980s Retro Monospace Canvas Display Buffer • Built with HTML5 Canvas & Tailwind CSS
+    </footer>
+
+    <!-- JavaScript Implementation -->
+    <script>
+        /**
+         * RETRO BOARD SYSTEM ARCHITECTURE
+         * Grid Dimensions: 80 Columns x 40 Rows
+         */
+        const COLS = 80;
+        const ROWS = 40;
+        
+        // Canvas & Rendering Context Setup
+        const canvas = document.getElementById('retroCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        
+        // Internal Grid Buffer Data Structure
+        // Array of COLS * ROWS objects { char, fg, bg }
+        const gridBuffer = new Array(COLS * ROWS);
+        
+        // Cell dimensions calculated dynamically based on font size
+        const FONT_SIZE = 16;
+        let cellWidth = 10;
+        let cellHeight = 16;
+
+        // Active animation timer reference for demos (Matrix rain, etc.)
+        let activeDemoInterval = null;
+
+        /**
+         * Initialize Board Buffer
+         */
+        function initGrid() {
+            for (let i = 0; i < COLS * ROWS; i++) {
+                gridBuffer[i] = {
+                    char: ' ',
+                    fg: '#33ff33',
+                    bg: '#000000'
+                };
+            }
+        }
+
+        /**
+         * Setup Canvas Dimensions for High DPI and crisp text rendering
+         */
+        function setupCanvasDimensions() {
+            // Measure precise character metrics in monospace font
+            ctx.font = `${FONT_SIZE}px 'Fira Code', 'Courier New', monospace`;
+            const metrics = ctx.measureText('M');
+            
+            // Set cell width based on character width (or uniform fixed width for crisp pixel grid)
+            cellWidth = Math.ceil(metrics.width || FONT_SIZE * 0.6);
+            cellHeight = Math.ceil(FONT_SIZE * 1.15);
+
+            // Set actual canvas pixel dimensions
+            canvas.width = COLS * cellWidth;
+            canvas.height = ROWS * cellHeight;
+        }
+
+        /**
+         * Main Render Loop - Redraws full screen grid from buffer
+         */
+        function renderBoard() {
+            // Disable image smoothing for ultra-crisp pixel edges
+            ctx.imageSmoothingEnabled = false;
+
+            // Clear full canvas background
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Configure text font & baseline
+            ctx.font = `bold ${FONT_SIZE}px 'Fira Code', 'Courier New', monospace`;
+            ctx.textBaseline = 'top';
+
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    const idx = y * COLS + x;
+                    const cell = gridBuffer[idx];
+                    const posX = x * cellWidth;
+                    const posY = y * cellHeight;
+
+                    // 1. Render Background (if not standard black or default)
+                    if (cell.bg && cell.bg !== '#000000' && cell.bg !== '#000' && cell.bg !== 'transparent') {
+                        ctx.fillStyle = cell.bg;
+                        ctx.fillRect(posX, posY, cellWidth, cellHeight);
+                    }
+
+                    // 2. Render ASCII Character Symbol
+                    if (cell.char && cell.char !== ' ') {
+                        ctx.fillStyle = cell.fg || '#33ff33';
+                        ctx.fillText(cell.char, posX, posY);
+                    }
+                }
+            }
+        }
+
+        /**
+         * STOP ACTIVE DEMOS IF RUNNING
+         */
+        function stopActiveDemo() {
+            if (activeDemoInterval) {
+                clearInterval(activeDemoInterval);
+                activeDemoInterval = null;
+            }
+        }
+
+        /**
+         * PUBLIC RETRO BOARD API (Exposed globally on window.RetroBoard)
+         */
+        window.RetroBoard = {
+            /**
+             * Sets character and colors at specified (x, y) coordinates
+             * @param {number} x - Column index (0 to 79)
+             * @param {number} y - Row index (0 to 39)
+             * @param {string} char - ASCII Character symbol
+             * @param {string} fgColor - Foreground text CSS color
+             * @param {string} bgColor - Background cell CSS color (optional)
+             */
+            setCell: function(x, y, char = ' ', fgColor = '#33ff33', bgColor = '#000000') {
+                if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return;
+                
+                const idx = Math.floor(y) * COLS + Math.floor(x);
+                gridBuffer[idx] = {
+                    char: String(char).charAt(0) || ' ',
+                    fg: fgColor,
+                    bg: bgColor
+                };
+                renderBoard();
+            },
+
+            /**
+             * Clears the board back to empty spaces and default black background
+             */
+            clear: function() {
+                stopActiveDemo();
+                for (let i = 0; i < COLS * ROWS; i++) {
+                    gridBuffer[i] = { char: ' ', fg: '#33ff33', bg: '#000000' };
+                }
+                renderBoard();
+            },
+
+            /**
+             * Fills the entire board screen with a single character and color
+             * @param {string} char - ASCII symbol
+             * @param {string} fgColor - Text color
+             * @param {string} bgColor - Cell background color
+             */
+            fill: function(char = ' ', fgColor = '#33ff33', bgColor = '#000000') {
+                stopActiveDemo();
+                const symbol = String(char).charAt(0) || ' ';
+                for (let i = 0; i < COLS * ROWS; i++) {
+                    gridBuffer[i] = { char: symbol, fg: fgColor, bg: bgColor };
+                }
+                renderBoard();
+            },
+
+            /**
+             * Helper to write a string of text starting at (x, y)
+             * @param {number} x - Starting column
+             * @param {number} y - Row position
+             * @param {string} text - String text to write
+             * @param {string} fgColor - Text foreground color
+             * @param {string} bgColor - Text background color
+             */
+            writeText: function(x, y, text, fgColor = '#33ff33', bgColor = '#000000') {
+                const str = String(text);
+                for (let i = 0; i < str.length; i++) {
+                    const targetX = x + i;
+                    if (targetX >= COLS) break; // Exceeds screen width
+                    this.setCell(targetX, y, str.charAt(i), fgColor, bgColor);
+                }
+            },
+
+            /**
+             * Returns dimensions of grid board
+             */
+            getDimensions: function() {
+                return { cols: COLS, rows: ROWS };
+            }
+        };
+
+        /**
+         * INTERACTIVE TEST FORM HANDLERS
+         */
+        function submitCellForm() {
+            stopActiveDemo();
+            const x = parseInt(document.getElementById('inputX').value, 10);
+            const y = parseInt(document.getElementById('inputY').value, 10);
+            const char = document.getElementById('inputChar').value || '@';
+            const fg = document.getElementById('inputFg').value;
+            const bg = document.getElementById('inputBg').value;
+
+            RetroBoard.setCell(x, y, char, fg, bg);
+        }
+
+        // Color input sync helpers
+        const inputFg = document.getElementById('inputFg');
+        const inputFgText = document.getElementById('inputFgText');
+        const inputBg = document.getElementById('inputBg');
+        const inputBgText = document.getElementById('inputBgText');
+
+        inputFg.addEventListener('input', (e) => inputFgText.value = e.target.value);
+        inputFgText.addEventListener('input', (e) => inputFg.value = e.target.value);
+        inputBg.addEventListener('input', (e) => inputBgText.value = e.target.value);
+        inputBgText.addEventListener('input', (e) => inputBg.value = e.target.value);
+
+        function setCharPreset(char) {
+            document.getElementById('inputChar').value = char;
+        }
+
+        function setFgSwatch(hexColor) {
+            inputFg.value = hexColor;
+            inputFgText.value = hexColor;
+        }
+
+        /**
+         * HOVER & COORDINATE TRACKING ON CANVAS
+         */
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            const cellX = Math.floor(mouseX / cellWidth);
+            const cellY = Math.floor(mouseY / cellHeight);
+
+            if (cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS) {
+                document.getElementById('hoverCoords').innerText = `Cursor: (x: ${cellX}, y: ${cellY})`;
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            document.getElementById('hoverCoords').innerText = `Cursor: (x: --, y: --)`;
+        });
+
+        // Click on canvas directly to set current form input
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const cellX = Math.floor(((e.clientX - rect.left) * scaleX) / cellWidth);
+            const cellY = Math.floor(((e.clientY - rect.top) * scaleY) / cellHeight);
+
+            if (cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS) {
+                document.getElementById('inputX').value = cellX;
+                document.getElementById('inputY').value = cellY;
+                submitCellForm();
+            }
+        });
+
+        /**
+         * PRESET DEMO FUNCTIONS
+         */
+
+        // 1. Title Banner Demo
+        function runTitleDemo() {
+            stopActiveDemo();
+            RetroBoard.clear();
+
+            // Border Box
+            for (let x = 0; x < COLS; x++) {
+                RetroBoard.setCell(x, 0, '═', '#00e5ff');
+                RetroBoard.setCell(x, ROWS - 1, '═', '#00e5ff');
+            }
+            for (let y = 0; y < ROWS; y++) {
+                RetroBoard.setCell(0, y, '║', '#00e5ff');
+                RetroBoard.setCell(COLS - 1, y, '║', '#00e5ff');
+            }
+            RetroBoard.setCell(0, 0, '╔', '#00e5ff');
+            RetroBoard.setCell(COLS - 1, 0, '╗', '#00e5ff');
+            RetroBoard.setCell(0, ROWS - 1, '╚', '#00e5ff');
+            RetroBoard.setCell(COLS - 1, ROWS - 1, '╝', '#00e5ff');
+
+            // Header Banner
+            RetroBoard.writeText(18, 5,  "  ____  _____ _____ ____   ___   ____  ____    _  ____  ", "#ffb000");
+            RetroBoard.writeText(18, 6,  " |  _ \\| ____|_   _|  _ \\ / _ \\ | __ )/ ___|  / ||___ \\ ", "#ffb000");
+            RetroBoard.writeText(18, 7,  " | |_) |  _|   | | | |_) | | | ||  _ \\ |  _   | |  __) |", "#ffb000");
+            RetroBoard.writeText(18, 8,  " |  _ <| |___  | | |  _ <| |_| || |_) | |_| |  | | / __/ ", "#ffb000");
+            RetroBoard.writeText(18, 9,  " |_| \\_\\_____| |_| |_| \\_\\\\___/ |____/ \\____|  |_||_____|", "#ffb000");
+
+            RetroBoard.writeText(23, 13, "=== 1980s MONOSPACE DISPLAY SYSTEM ===", "#33ff33");
+            RetroBoard.writeText(20, 16, "Resolution : 80 Columns x 40 Rows (3,200 Cells)", "#ffffff");
+            RetroBoard.writeText(20, 18, "Colors     : Per-cell Foreground & Background", "#ffffff");
+            RetroBoard.writeText(20, 20, "API Ready  : window.RetroBoard.setCell(x, y, char, fg, bg)", "#00e5ff");
+
+            // Interactive instruction box
+            for (let x = 12; x < 68; x++) {
+                RetroBoard.setCell(x, 24, '-', '#ff0055');
+                RetroBoard.setCell(x, 32, '-', '#ff0055');
+            }
+            RetroBoard.writeText(14, 26, "TEST THE API IN BROWSER CONSOLE (F12):", "#ffff55");
+            RetroBoard.writeText(14, 28, "RetroBoard.setCell(40, 20, '@', '#ff0055', '#222244');", "#33ff33");
+            RetroBoard.writeText(14, 30, "RetroBoard.writeText(10, 35, 'SYSTEM READY', '#00e5ff');", "#33ff33");
+        }
+
+        // 2. Matrix Digital Rain Animation Demo
+        function startMatrixDemo() {
+            stopActiveDemo();
+            RetroBoard.clear();
+
+            const drops = [];
+            for (let i = 0; i < COLS; i++) {
+                drops[i] = {
+                    y: Math.floor(Math.random() * -40),
+                    speed: Math.floor(Math.random() * 2) + 1,
+                    length: Math.floor(Math.random() * 15) + 5
+                };
+            }
+
+            const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*§";
+
+            activeDemoInterval = setInterval(() => {
+                // Slightly dim screen by replacing old chars with darker green / trail effect
+                for (let x = 0; x < COLS; x++) {
+                    const drop = drops[x];
+                    
+                    if (drop.y >= 0 && drop.y < ROWS) {
+                        const randomChar = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                        // Bright leading head character
+                        RetroBoard.setCell(x, drop.y, randomChar, '#ffffff', '#000000');
+                        
+                        // Green tail behind head
+                        if (drop.y - 1 >= 0) {
+                            RetroBoard.setCell(x, drop.y - 1, randomChar, '#33ff33', '#000000');
+                        }
+                        // Dark green tail end
+                        if (drop.y - drop.length >= 0) {
+                            RetroBoard.setCell(x, drop.y - drop.length, ' ', '#000000', '#000000');
+                        }
+                    }
+
+                    drop.y += drop.speed;
+
+                    // Reset drop when past bottom screen
+                    if (drop.y - drop.length > ROWS) {
+                        drop.y = Math.floor(Math.random() * -20);
+                        drop.speed = Math.floor(Math.random() * 2) + 1;
+                        drop.length = Math.floor(Math.random() * 15) + 5;
+                    }
+                }
+            }, 60);
+        }
+
+        // 3. Roguelike Dungeon Map Demo
+        function runRoguelikeDemo() {
+            stopActiveDemo();
+            RetroBoard.clear();
+
+            // Fill background ground dot pattern
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    if (Math.random() < 0.15) {
+                        RetroBoard.setCell(x, y, '.', '#1a3a1a');
+                    }
+                }
+            }
+
+            // Draw Dungeon Rooms
+            function drawRoom(rx, ry, rw, rh, wallColor, floorColor) {
+                for (let y = ry; y < ry + rh; y++) {
+                    for (let x = rx; x < rx + rw; x++) {
+                        if (x === rx || x === rx + rw - 1 || y === ry || y === ry + rh - 1) {
+                            RetroBoard.setCell(x, y, '#', wallColor);
+                        } else {
+                            RetroBoard.setCell(x, y, '.', floorColor);
+                        }
+                    }
+                }
+            }
+
+            drawRoom(5, 5, 20, 12, '#888888', '#333333');
+            drawRoom(35, 8, 25, 14, '#aa6633', '#443322');
+            drawRoom(15, 22, 30, 13, '#4488aa', '#223344');
+
+            // Draw Corridors
+            for (let x = 25; x <= 35; x++) RetroBoard.setCell(x, 10, '.', '#555555');
+            for (let y = 17; y <= 22; y++) RetroBoard.setCell(45, y, '.', '#555555');
+
+            // Game Entities (Player, Monsters, Treasure)
+            RetroBoard.setCell(10, 10, '@', '#ffff00', '#000000'); // Hero Player
+            RetroBoard.writeText(12, 10, "HERO", '#ffff00');
+
+            RetroBoard.setCell(48, 12, 'G', '#33ff33'); // Goblin
+            RetroBoard.setCell(52, 16, 'D', '#ff3333'); // Dragon
+            RetroBoard.setCell(22, 28, '$', '#ffb000'); // Gold Treasure
+            RetroBoard.setCell(38, 25, '&', '#ff00ff'); // Demon
+
+            // Status UI Bar at bottom
+            RetroBoard.writeText(2, 38, "HP: 100/100  | MP: 50/50  | LEVEL: 5  | GOLD: 450", "#00e5ff", "#112233");
+        }
+
+        // 4. Color Spectrum Spectrum Demo
+        function runSpectrumDemo() {
+            stopActiveDemo();
+            RetroBoard.clear();
+
+            const colors = [
+                '#ff0000', '#ff5500', '#ffaa00', '#ffff00', 
+                '#aaff00', '#55ff00', '#00ff00', '#00ff55', 
+                '#00ffaa', '#00ffff', '#00aaff', '#0055ff', 
+                '#0000ff', '#5500ff', '#aa00ff', '#ff00ff'
+            ];
+
+            RetroBoard.writeText(28, 2, "COLOR SPECTRUM TEST MATRIX", "#ffffff");
+
+            for (let y = 5; y < 35; y++) {
+                const colorIdx = (y - 5) % colors.length;
+                const fg = colors[colorIdx];
+                const bg = colors[(colorIdx + 8) % colors.length];
+
+                for (let x = 5; x < 75; x++) {
+                    const charCode = 33 + ((x + y) % 90);
+                    const char = String.fromCharCode(charCode);
+                    
+                    // Show pattern of text foreground and block backgrounds
+                    if (y % 2 === 0) {
+                        RetroBoard.setCell(x, y, char, fg, '#000000');
+                    } else {
+                        RetroBoard.setCell(x, y, '█', fg, '#000000');
+                    }
+                }
+            }
+        }
+
+        // Initialize application on load
+        window.addEventListener('load', () => {
+            initGrid();
+            setupCanvasDimensions();
+            runTitleDemo(); // Start with title demo banner
+        });
+
+        // Handle window resize dynamically while keeping pixel crispness
+        window.addEventListener('resize', () => {
+            setupCanvasDimensions();
+            renderBoard();
+        });
+    </script>
+</body>
+</html>
