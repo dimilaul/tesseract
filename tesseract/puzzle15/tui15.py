@@ -5,6 +5,10 @@ import tty
 import termios
 import random
 
+from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardModel
+from tesseract.puzzle15.puzzle15_board_view import Puzzle15BoardView
+from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BordController
+
 tabulate.PRESERVE_WHITESPACE = True
 
 DEFAULT_SHUFFLE_MOVES = 5
@@ -194,7 +198,6 @@ def transform(array, cmd, loud):
             idx16 = i
             break
     coord16 = array_position_to_coordinates(idx16)
-    idx16_prime = coordinates_to_position(*coord16)
     neighbour_coord = neighbour_coordinates_for_move(array, coord16, cmd)
     if neighbour_coord:
         neighbour_idx = coordinates_to_position(*neighbour_coord)
