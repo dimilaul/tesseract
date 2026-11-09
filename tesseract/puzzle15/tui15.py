@@ -271,6 +271,11 @@ def build_parser():
 if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
+
+    model = Puzzle15BoardModel(args.dimensions[0], args.dimensions[1], args.dimensions[2], args.dimensions[3])
+    view = Puzzle15BoardView()
+    controller = Puzzle15BoardController()
+
     number_of_shuffle_moves = args.shuffle_moves
     array = init_array()
     print("Press <Enter> or <Space> in order to shuffle, press O to order it back")
