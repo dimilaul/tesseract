@@ -14,7 +14,7 @@ class BoardView:
         self._cell_left_diag_span = cell_left_diag_span
         self._cell_right_diag_span = cell_right_diag_span
         
-    def clear_view()->None:
+    def clear_view(self)->None:
         self._view = []
         for i in range(0, self._height):
             line = ''
@@ -22,7 +22,7 @@ class BoardView:
                 line += ' '
             self._view.append(line)
             
-    def draw_board(board_model: BoardModel)->None:
+    def draw_board(self, board_model: BoardModel)->None:
         self._view[0, 0] = str(board_model._array[0])
         self._view[0, 1] = str(board_model._array[1])
         pass
