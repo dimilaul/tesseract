@@ -6,7 +6,7 @@ import termios
 import random
 
 from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardModel
-from tesseract.puzzle15.puzzle15_board_view import Puzzle15BoardView
+from tesseract.puzzle15.puzzle15_simplified_board_view import Puzzle15SimplifiedBoardView
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
 
@@ -234,9 +234,15 @@ if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
 
+    # MVC initialization
+    
     model = Puzzle15BoardModel(args.dimensions[0], args.dimensions[1], args.dimensions[2], args.dimensions[3])
-    view = Puzzle15BoardView()
+    view = Puzzle15SimplifiedBoardView()
     controller = Puzzle15BoardController()
+    controller.set_board_model(model)
+    view.set_board_controller(controller)
+    
+    # here goes the main gameplay loop
 
     number_of_shuffle_moves = args.shuffle_moves
     array = init_array()
