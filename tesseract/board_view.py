@@ -41,4 +41,6 @@ class BoardView:
     def report_illegal_command(self, board_cmd: BoardCommand)->None:
         pass
 
+    def get_board_model(self):
+        return self._board_controller.get_board_model()
         

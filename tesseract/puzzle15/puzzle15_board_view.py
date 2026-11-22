@@ -11,5 +11,5 @@ class Puzzle15BoardView(BoardView):
         return BoardCommand.NOP
         
     def draw(self):
-        board_model = self._board_controller.get_board_model()
+        board_model = self.get_board_model()
         print(f"BOARD: {board_model}")
