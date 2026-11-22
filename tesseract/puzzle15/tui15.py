@@ -8,23 +8,13 @@ import random
 from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardModel
 from tesseract.puzzle15.puzzle15_board_view import Puzzle15BoardView
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
+from tesseract.board_command import BoardCommand
 
 tabulate.PRESERVE_WHITESPACE = True
 
 DEFAULT_SHUFFLE_MOVES = 5
 number_of_shuffle_moves = DEFAULT_SHUFFLE_MOVES
 DEFAULT_DIMENSIONS = [4, 4, 4, 4]
-
-MOVE_UP = 1
-MOVE_DOWN = 2
-MOVE_RIGHT = 3
-MOVE_LEFT = 4
-MOVE_UPSQ = 5
-MOVE_DOWNSQ = 6
-MOVE_LEFTSQ = 7
-MOVE_RIGHTSQ = 8
-MOVE_SHUFFLE = 9
-MOVE_ORDER = 10
 
 STATUS_INITIAL = 0
 STATUS_MOVED = 1
@@ -116,55 +106,28 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-def move_to_string(move):
-    if move == MOVE_UP:
-        return "up"
-    elif move == MOVE_DOWN:
-        return "down"
-    elif move == MOVE_RIGHT:
-        return "right"
-    elif move == MOVE_LEFT:
-        return "left"
-    elif move == MOVE_UPSQ:
-        return "up square"
-    elif move == MOVE_DOWNSQ:
-        return "down square"
-    elif move == MOVE_LEFTSQ:
-        return "left square"
-    elif move == MOVE_RIGHTSQ:
-        return "right square"
-    elif move == MOVE_SHUFFLE:
-        return "shuffle"
-    elif move == MOVE_ORDER:
-        return "order"
-    else:
-        return " !!! UNRECOGNIZED MOVE !!! "
-
-
 def parse_input(inp):
     move = 0
     if inp == 65:
-        move = MOVE_UP
+        move = BoardCommand.MOVE_UP.value
     elif inp == 66:
-        move = MOVE_DOWN
+        move = BoardCommand.MOVE_DOWN.value
     elif inp == 67:
-        move = MOVE_RIGHT
+        move = BoardCommand.MOVE_RIGHT.value
     elif inp == 68:
-        move = MOVE_LEFT
+        move = BoardCommand.MOVE_LEFT.value
     elif inp == ord('w'):
-        move = MOVE_UPSQ
+        move = BoardCommand.MOVE_UPSQ.value
     elif inp == ord('s'):
-        move = MOVE_DOWNSQ
+        move = BoardCommand.MOVE_DOWNSQ.value
     elif inp == ord('d'):
-        move = MOVE_RIGHTSQ
+        move = BoardCommand.MOVE_RIGHTSQ.value
     elif inp == ord('a'):
-        move = MOVE_LEFTSQ
+        move = BoardCommand.MOVE_LEFTSQ.value
     elif inp == 10 or inp == ord(' '):
-        move = MOVE_SHUFFLE
+        move = BoardCommand.MOVE_SHUFFLE.value
     elif inp == ord('o'):
-        move = MOVE_ORDER
-#    if move:
-#        print(move_to_string(move))
+        move = BoardCommand.MOVE_ORDER.value
     return move
 
 def array_position_to_coordinates(idx):
@@ -174,13 +137,13 @@ def coordinates_to_position(x, y, z, t):
     return x * 8 + y * 4 + z * 2 + t
 
 def neighbour_coordinates_for_move(array, coord16, cmd):
-    if coord16[0] and cmd == MOVE_DOWNSQ   or not coord16[0] and cmd == MOVE_UPSQ:
+    if coord16[0] and cmd == BoardCommand.MOVE_DOWNSQ.value   or not coord16[0] and cmd == BoardCommand.MOVE_UPSQ.value:
         return (1 - coord16[0], coord16[1], coord16[2], coord16[3])
-    if coord16[1] and cmd == MOVE_RIGHTSQ  or not coord16[1] and cmd == MOVE_LEFTSQ:
+    if coord16[1] and cmd == BoardCommand.MOVE_RIGHTSQ.value  or not coord16[1] and cmd == BoardCommand.MOVE_LEFTSQ.value:
         return (coord16[0], 1 - coord16[1], coord16[2], coord16[3])
-    if coord16[2] and cmd == MOVE_DOWN     or not coord16[2] and cmd == MOVE_UP:
+    if coord16[2] and cmd == BoardCommand.MOVE_DOWN.value     or not coord16[2] and cmd == BoardCommand.MOVE_UP.value:
         return (coord16[0], coord16[1], 1 - coord16[2], coord16[3])
-    if coord16[3] and cmd == MOVE_RIGHT    or not coord16[3] and cmd == MOVE_LEFT:
+    if coord16[3] and cmd == BoardCommand.MOVE_RIGHT.value    or not coord16[3] and cmd == BoardCommand.MOVE_LEFT.value:
         return (coord16[0], coord16[1], coord16[2], 1 - coord16[3])
 
     return None
@@ -224,7 +187,6 @@ def revert_move(move):
 def shuffle(array):
     for move in range(number_of_shuffle_moves):
         cmd = random.sample(range(1, 9), 1)[0]
-#        print(f"shuffling with cmd {move_to_string(cmd)}, in order to revert apply {move_to_string(revert_move(cmd))}")
         array, _ = transform(array, cmd, False)
     return array
 
@@ -290,10 +252,10 @@ if __name__ == "__main__":
 #        print(f"\n{ord(c)}")
         cmd = parse_input(ord(c))
         if cmd:
-            if cmd == MOVE_SHUFFLE:
+            if cmd == BoardCommand.MOVE_SHUFFLE.value:
                 array = shuffle(array)
                 draw_board(array, STATUS_SHUFFLED)
-            elif cmd == MOVE_ORDER:
+            elif cmd == BoardCommand.MOVE_ORDER.value:
                 array = init_array()
                 draw_board(array, STATUS_INITIAL)
             else:
