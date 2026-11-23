@@ -219,13 +219,13 @@ if __name__ == "__main__":
     draw_board(array, STATUS_INITIAL)
     while True:
         cmd = keyboard_control.get_next_command_from_input()
-        if cmd:
-            if cmd == BoardCommand.MOVE_SHUFFLE.value:
+        if cmd != BoardCommand.NOP:
+            if cmd == BoardCommand.MOVE_SHUFFLE:
                 array = shuffle(array)
                 draw_board(array, STATUS_SHUFFLED)
-            elif cmd == BoardCommand.MOVE_ORDER.value:
+            elif cmd == BoardCommand.MOVE_ORDER:
                 array = init_array()
                 draw_board(array, STATUS_INITIAL)
             else:
-                array, status = transform(array, cmd, True)
+                array, status = transform(array, cmd.value, True)
                 draw_board(array, status)

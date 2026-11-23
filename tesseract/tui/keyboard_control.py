@@ -20,29 +20,29 @@ class KeyboardControl:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-    def parse_input(self, inp):
-        move = 0
+    def parse_input(self, inp)->BoardCommand:
+        cmd = BoardCommand.NOP
         if inp == 65:
-            move = BoardCommand.MOVE_UP.value
+            cmd = BoardCommand.MOVE_UP
         elif inp == 66:
-            move = BoardCommand.MOVE_DOWN.value
+            cmd = BoardCommand.MOVE_DOWN
         elif inp == 67:
-            move = BoardCommand.MOVE_RIGHT.value
+            cmd = BoardCommand.MOVE_RIGHT
         elif inp == 68:
-            move = BoardCommand.MOVE_LEFT.value
+            cmd = BoardCommand.MOVE_LEFT
         elif inp == ord('w'):
-            move = BoardCommand.MOVE_UPSQ.value
+            cmd = BoardCommand.MOVE_UPSQ
         elif inp == ord('s'):
-            move = BoardCommand.MOVE_DOWNSQ.value
+            cmd = BoardCommand.MOVE_DOWNSQ
         elif inp == ord('d'):
-            move = BoardCommand.MOVE_RIGHTSQ.value
+            cmd = BoardCommand.MOVE_RIGHTSQ
         elif inp == ord('a'):
-            move = BoardCommand.MOVE_LEFTSQ.value
+            cmd = BoardCommand.MOVE_LEFTSQ
         elif inp == 10 or inp == ord(' '):
-            move = BoardCommand.MOVE_SHUFFLE.value
+            cmd = BoardCommand.MOVE_SHUFFLE
         elif inp == ord('o'):
-            move = BoardCommand.MOVE_ORDER.value
-        return move
+            cmd = BoardCommand.MOVE_ORDER
+        return cmd
 
         
     def get_next_command_from_input(self)->BoardCommand:
