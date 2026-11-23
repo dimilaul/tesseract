@@ -1,14 +1,13 @@
 import argparse
 import sys
 from tabulate import tabulate
-import tty
-import termios
 import random
 
 from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardModel
 from tesseract.puzzle15.puzzle15_simplified_board_view import Puzzle15SimplifiedBoardView
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
+from tesseract.tui.keyboard_control import KeyboardControl
 
 tabulate.PRESERVE_WHITESPACE = True
 
@@ -93,42 +92,6 @@ def draw_board(array, status):
     for line in bottom_row:
         print(line)
     print(TERMCOLOR_RESET)
-
-
-def getch():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-    # Use cbreak mode to keep Ctrl+C signal handling active
-        tty.setcbreak(fd)
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
-
-def parse_input(inp):
-    move = 0
-    if inp == 65:
-        move = BoardCommand.MOVE_UP.value
-    elif inp == 66:
-        move = BoardCommand.MOVE_DOWN.value
-    elif inp == 67:
-        move = BoardCommand.MOVE_RIGHT.value
-    elif inp == 68:
-        move = BoardCommand.MOVE_LEFT.value
-    elif inp == ord('w'):
-        move = BoardCommand.MOVE_UPSQ.value
-    elif inp == ord('s'):
-        move = BoardCommand.MOVE_DOWNSQ.value
-    elif inp == ord('d'):
-        move = BoardCommand.MOVE_RIGHTSQ.value
-    elif inp == ord('a'):
-        move = BoardCommand.MOVE_LEFTSQ.value
-    elif inp == 10 or inp == ord(' '):
-        move = BoardCommand.MOVE_SHUFFLE.value
-    elif inp == ord('o'):
-        move = BoardCommand.MOVE_ORDER.value
-    return move
 
 def array_position_to_coordinates(idx):
     return (idx // 8, idx % 8 // 4, idx % 4 // 2, idx % 2)
@@ -242,6 +205,9 @@ if __name__ == "__main__":
     controller.set_board_model(model)
     view.set_board_controller(controller)
     
+    # TUI keyboard control
+    keyboard_control = KeyboardControl()
+    
     # here goes the main gameplay loop
 
     number_of_shuffle_moves = args.shuffle_moves
@@ -252,11 +218,7 @@ if __name__ == "__main__":
     draw_empty_board()
     draw_board(array, STATUS_INITIAL)
     while True:
-        c = getch()
-        if ord(c) == 91 or ord(c) == 27:
-            continue
-#        print(f"\n{ord(c)}")
-        cmd = parse_input(ord(c))
+        cmd = keyboard_control.get_next_command_from_input()
         if cmd:
             if cmd == BoardCommand.MOVE_SHUFFLE.value:
                 array = shuffle(array)
