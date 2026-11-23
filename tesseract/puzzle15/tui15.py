@@ -4,6 +4,7 @@ from tabulate import tabulate
 import random
 
 from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardModel
+from tesseract.puzzle15.puzzle15_board_model import Puzzle15BoardStatus
 from tesseract.puzzle15.puzzle15_simplified_board_view import Puzzle15SimplifiedBoardView
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
@@ -16,11 +17,6 @@ DEFAULT_SHUFFLE_MOVES = 5
 number_of_shuffle_moves = DEFAULT_SHUFFLE_MOVES
 DEFAULT_DIMENSIONS = [4, 4, 4, 4]
 
-STATUS_INITIAL = 0
-STATUS_MOVED = 1
-STATUS_ILLEGAL_MOVE = 2
-STATUS_SOLVED = 3
-STATUS_SHUFFLED = 4
 
 def number_to_string(array, idx):
     num = array[idx]
@@ -51,7 +47,7 @@ def draw_empty_board():
 
 def draw_board(array, status):
     if_solved = ""
-    if status == STATUS_SOLVED:
+    if status == Puzzle15BoardStatus.STATUS_SOLVED:
         if_solved = TerminalControl.BG_CYAN
     print(f"\033[{TerminalControl.BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
     sub1 = [[number_to_string(array,  0), number_to_string(array,  1)], [number_to_string(array,  2), number_to_string(array,  3)]]
@@ -116,11 +112,11 @@ def transform(array, cmd, loud):
         neighbour_idx = coordinates_to_position(*neighbour_coord)
         array[idx16] = array[neighbour_idx]
         array[neighbour_idx] = 16
-        status = STATUS_MOVED
+        status = Puzzle15BoardStatus.STATUS_MOVED
         if in_order(array):
-            status = STATUS_SOLVED
+            status = Puzzle15BoardStatus.STATUS_SOLVED
     else:
-        status = STATUS_ILLEGAL_MOVE
+        status = Puzzle15BoardStatus.STATUS_ILLEGAL_MOVE
     return array, status
 
 def in_order(array):
@@ -203,16 +199,16 @@ if __name__ == "__main__":
     print("Press arrows to move inside the square and WASD to move between the squares")
 
     draw_empty_board()
-    draw_board(array, STATUS_INITIAL)
+    draw_board(array, Puzzle15BoardStatus.STATUS_INITIAL)
     while True:
         cmd = keyboard_control.get_next_command_from_input()
         if cmd != BoardCommand.NOP:
             if cmd == BoardCommand.MOVE_SHUFFLE:
                 array = shuffle(array)
-                draw_board(array, STATUS_SHUFFLED)
+                draw_board(array, Puzzle15BoardStatus.STATUS_SHUFFLED)
             elif cmd == BoardCommand.MOVE_ORDER:
                 array = init_array()
-                draw_board(array, STATUS_INITIAL)
+                draw_board(array, Puzzle15BoardStatus.STATUS_INITIAL)
             else:
                 array, status = transform(array, cmd.value, True)
                 draw_board(array, status)
