@@ -21,25 +21,11 @@ STATUS_ILLEGAL_MOVE = 2
 STATUS_SOLVED = 3
 STATUS_SHUFFLED = 4
 
-BOARD_TUI_HEIGHT = 12
-
-
-# ansi term colors
-BG_BLACK = "\033[40m"
-BG_GREEN = "\033[42m"
-BG_CYAN = "\033[46m"
-FG_RED = "\033[31m"
-FG_GREEN = "\033[33m"
-FG_CYAN = "\033[36m"
-FG_WHITE = "\033[37m"
-FG_BLACK = "\033[30m"
-TERMCOLOR_RESET = "\033[0m"
-
 def number_to_string(array, idx):
     num = array[idx]
 
     if num == 16:
-        return f"{FG_BLACK}--{FG_WHITE}" 
+        return f"{Puzzle15SimplifiedBoardView.FG_BLACK}--{Puzzle15SimplifiedBoardView.FG_WHITE}"
 
     idx16 = -1
     for i in range(0, 16):
@@ -53,20 +39,20 @@ def number_to_string(array, idx):
     for neighbour_coord in all_neighbours:
         neighbour_idx = coordinates_to_position(*neighbour_coord)
         if idx == neighbour_idx:
-            return f"{FG_GREEN}{num:2}{FG_WHITE}"
+            return f"{Puzzle15SimplifiedBoardView.FG_GREEN}{num:2}{Puzzle15SimplifiedBoardView.FG_WHITE}"
 
-    return f"{FG_WHITE}{num:2}"
+    return f"{Puzzle15SimplifiedBoardView.FG_WHITE}{num:2}"
 
 
 def draw_empty_board():
-    for i in range(0, BOARD_TUI_HEIGHT):
+    for i in range(0, Puzzle15SimplifiedBoardView.BOARD_TUI_HEIGHT):
         print()
 
 def draw_board(array, status):
     if_solved = ""
     if status == STATUS_SOLVED:
-        if_solved = BG_CYAN
-    print(f"\033[{BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
+        if_solved = Puzzle15SimplifiedBoardView.BG_CYAN
+    print(f"\033[{Puzzle15SimplifiedBoardView.BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
     sub1 = [[number_to_string(array,  0), number_to_string(array,  1)], [number_to_string(array,  2), number_to_string(array,  3)]]
     sub2 = [[number_to_string(array,  4), number_to_string(array,  5)], [number_to_string(array,  6), number_to_string(array,  7)]]
     sub3 = [[number_to_string(array,  8), number_to_string(array,  9)], [number_to_string(array, 10), number_to_string(array, 11)]]
@@ -91,7 +77,7 @@ def draw_board(array, status):
     print("                          ")
     for line in bottom_row:
         print(line)
-    print(TERMCOLOR_RESET)
+    print(Puzzle15SimplifiedBoardView.TERMCOLOR_RESET)
 
 def array_position_to_coordinates(idx):
     return (idx // 8, idx % 8 // 4, idx % 4 // 2, idx % 2)
