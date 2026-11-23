@@ -8,6 +8,7 @@ from tesseract.puzzle15.puzzle15_simplified_board_view import Puzzle15Simplified
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
 from tesseract.tui.keyboard_control import KeyboardControl
+from tesseract.tui.terminal import TerminalControl
 
 tabulate.PRESERVE_WHITESPACE = True
 
@@ -25,7 +26,7 @@ def number_to_string(array, idx):
     num = array[idx]
 
     if num == 16:
-        return f"{Puzzle15SimplifiedBoardView.FG_BLACK}--{Puzzle15SimplifiedBoardView.FG_WHITE}"
+        return f"{TerminalControl.FG_BLACK}--{TerminalControl.FG_WHITE}"
 
     idx16 = -1
     for i in range(0, 16):
@@ -39,20 +40,20 @@ def number_to_string(array, idx):
     for neighbour_coord in all_neighbours:
         neighbour_idx = coordinates_to_position(*neighbour_coord)
         if idx == neighbour_idx:
-            return f"{Puzzle15SimplifiedBoardView.FG_GREEN}{num:2}{Puzzle15SimplifiedBoardView.FG_WHITE}"
+            return f"{TerminalControl.FG_GREEN}{num:2}{TerminalControl.FG_WHITE}"
 
-    return f"{Puzzle15SimplifiedBoardView.FG_WHITE}{num:2}"
+    return f"{TerminalControl.FG_WHITE}{num:2}"
 
 
 def draw_empty_board():
-    for i in range(0, Puzzle15SimplifiedBoardView.BOARD_TUI_HEIGHT):
+    for i in range(0, TerminalControl.BOARD_TUI_HEIGHT):
         print()
 
 def draw_board(array, status):
     if_solved = ""
     if status == STATUS_SOLVED:
-        if_solved = Puzzle15SimplifiedBoardView.BG_CYAN
-    print(f"\033[{Puzzle15SimplifiedBoardView.BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
+        if_solved = TerminalControl.BG_CYAN
+    print(f"\033[{TerminalControl.BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
     sub1 = [[number_to_string(array,  0), number_to_string(array,  1)], [number_to_string(array,  2), number_to_string(array,  3)]]
     sub2 = [[number_to_string(array,  4), number_to_string(array,  5)], [number_to_string(array,  6), number_to_string(array,  7)]]
     sub3 = [[number_to_string(array,  8), number_to_string(array,  9)], [number_to_string(array, 10), number_to_string(array, 11)]]
@@ -77,7 +78,7 @@ def draw_board(array, status):
     print("                          ")
     for line in bottom_row:
         print(line)
-    print(Puzzle15SimplifiedBoardView.TERMCOLOR_RESET)
+    print(TerminalControl.TERMCOLOR_RESET)
 
 def array_position_to_coordinates(idx):
     return (idx // 8, idx % 8 // 4, idx % 4 // 2, idx % 2)
