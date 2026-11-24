@@ -12,7 +12,7 @@ class TextualColor(Enum):
     RED = 3
     WHITE = 4
 
-class TextualAbstractBoardView:
+class VirtualTextualScreen:
     """
     Textual representation of the screen
     """
@@ -40,19 +40,19 @@ class BoardView:
     """
     Generic ASCII-graphical representation of a 4D board
     """
-    def __init__(self, width=80, height=40, cell_width=1, cell_height = 1, cell_left_diag_span = 1, cell_right_diag_span = 2):
-        self._board_controller = None
-        self._height = height
-        self._width = width
-        self._view = []
-        self.clear_view()
+    def __init__(self,
+        board_controller: BoardController,
+        virtual_screen: VirtualTextualScreen,
+        cell_width: int = 2,
+        cell_height:int = 1,
+        cell_left_diag_span: int = 1,
+        cell_right_diag_span: int = 2):
+        
+        self._screen = screen
         self._cell_height = cell_height
         self._cell_width = cell_width
         self._cell_left_diag_span = cell_left_diag_span
         self._cell_right_diag_span = cell_right_diag_span
-        
-
-    def set_board_controller(self, board_controller: BoardController)->None:
         self._board_controller = board_controller
         
     def clear_view(self)->None:
@@ -63,9 +63,11 @@ class BoardView:
                 line += ' '
             self._view.append(line)
             
-    def draw_board(self, board_model: BoardModel)->None:
-        self._view[0, 0] = str(board_model._array[0])
-        self._view[0, 1] = str(board_model._array[1])
+    def draw_board_on_virtual_screen(self)->None:
+        pass
+        
+    def draw_virtual_screen(self)->None:
+        pass
 
     def is_legal(self, board_cmd: BoardCommand)->bool:
         return self._board_controller.is_legal
@@ -76,6 +78,4 @@ class BoardView:
     def report_illegal_command(self, board_cmd: BoardCommand)->None:
         pass
 
-    def get_board_model(self):
-        return self._board_controller.get_board_model()
-        
+

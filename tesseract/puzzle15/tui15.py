@@ -183,10 +183,9 @@ if __name__ == "__main__":
     # MVC initialization
     
     model = Puzzle15BoardModel(args.dimensions[0], args.dimensions[1], args.dimensions[2], args.dimensions[3])
-    view = Puzzle15SimplifiedBoardView()
     controller = Puzzle15BoardController()
     controller.set_board_model(model)
-    view.set_board_controller(controller)
+    view = Puzzle15SimplifiedBoardView(controller)
     
     # TUI keyboard control
     keyboard_control = KeyboardControl()
