@@ -1,4 +1,5 @@
-from tesseract.board_view import BoardView
+from tesseract.board_controller import BoardController
+from tesseract.board_view import BoardView, VirtualTextualScreen
 from tesseract.board_command import BoardCommand
 
 class Puzzle15BoardView(BoardView):
@@ -9,11 +10,11 @@ class Puzzle15BoardView(BoardView):
     
     def __init__(self,
         board_controller: BoardController,
-        virtual_screen: VirtualTextualScreen,
-        super.__init__(
+        virtual_screen: VirtualTextualScreen):
+        super().__init__(
             board_controller,
             virtual_screen,
-            CELL_WIDTH,
-            CELL_HEIGHT,
-            CELL_DIAG_LEFT,
-            CELL_DIAG_RIGHT)
+            self.CELL_WIDTH,
+            self.CELL_HEIGHT,
+            self.CELL_DIAG_LEFT,
+            self.CELL_DIAG_RIGHT)
