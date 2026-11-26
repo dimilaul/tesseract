@@ -1,7 +1,8 @@
 from tesseract.board_model import BoardModel
 from tesseract.board_controller import BoardController
 from tesseract.board_view import BoardView, VirtualTextualScreen
-from tesseract.tui.terminal import TerminalControl, TerminalScreenDraw
+from tesseract.tui.terminal.terminal_control import TerminalControl
+from tesseract.tui.terminal.terminal_screen import TerminalScreen
 from tesseract.tui.keyboard_control import KeyboardControl
 from tesseract.board_command import BoardCommand
 
@@ -20,7 +21,7 @@ class VirtualScreenPilotView(BoardView):
 def main():
     view = VirtualScreenPilotView()
     
-    terminal_screen = TerminalScreenDraw()
+    terminal_screen = TerminalScreen()
     terminal_screen.draw_empty_screen(view.get_screen())
     terminal_screen.draw_screen(view.get_screen())
     
