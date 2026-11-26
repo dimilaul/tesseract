@@ -9,7 +9,7 @@ from tesseract.puzzle15.puzzle15_simplified_board_view import Puzzle15Simplified
 from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
 from tesseract.tui.keyboard_control import KeyboardControl
-from tesseract.tui.terminal import TerminalControl
+from tesseract.tui.terminal.terminal_control import TerminalControl
 
 tabulate.PRESERVE_WHITESPACE = True
 
@@ -17,6 +17,9 @@ DEFAULT_SHUFFLE_MOVES = 5
 number_of_shuffle_moves = DEFAULT_SHUFFLE_MOVES
 DEFAULT_DIMENSIONS = [4, 4, 4, 4]
 
+model = None
+controller = None
+view = None
 
 def number_to_string(array, idx):
     num = array[idx]
@@ -76,11 +79,11 @@ def draw_board(array, status):
         print(line)
     print(TerminalControl.TERMCOLOR_RESET)
 
-def array_position_to_coordinates(idx):
-    return (idx // 8, idx % 8 // 4, idx % 4 // 2, idx % 2)
+def array_position_to_coordinates(position: int)->tuple[int, int, int, int]:
+    return model.position_to_coordinates(position)
 
-def coordinates_to_position(x, y, z, t):
-    return x * 8 + y * 4 + z * 2 + t
+def coordinates_to_position(x: int, y: int, z: int, t: int)->int:
+    return model.coordinates_to_position(x, y, z, t)
 
 def neighbour_coordinates_for_move(array, coord16, cmd):
     if coord16[0] and cmd == BoardCommand.MOVE_DOWNSQ.value   or not coord16[0] and cmd == BoardCommand.MOVE_UPSQ.value:
@@ -176,19 +179,24 @@ def build_parser():
     )
     return parser
 
-if __name__ == "__main__":
+def main():
+    """Initialize MVC components and run the Puzzle 15 TUI loop."""
+    global model
+    global controller
+    global view
+    global number_of_shuffle_moves
+
     parser = build_parser()
     args = parser.parse_args()
 
     # MVC initialization
-    
     model = Puzzle15BoardModel(args.dimensions[0], args.dimensions[1], args.dimensions[2], args.dimensions[3])
     controller = Puzzle15BoardController(model)
     view = Puzzle15SimplifiedBoardView(controller)
-    
+
     # TUI keyboard control
     keyboard_control = KeyboardControl()
-    
+
     # here goes the main gameplay loop
 
     number_of_shuffle_moves = args.shuffle_moves
@@ -210,3 +218,7 @@ if __name__ == "__main__":
             else:
                 array, status = transform(array, cmd.value, True)
                 draw_board(array, status)
+
+
+if __name__ == "__main__":
+    main()

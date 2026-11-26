@@ -15,9 +15,12 @@ class BoardModel:
         self._size_t = size_t
         self._initialize_array()
         
-    def coordinates_to_position(self, x, y, z, t):
-        return 0
-        
+    def position_to_coordinates(self, position: int)->tuple[int, int, int, int]:
+        return (position // 8, position % 8 // 4, position % 4 // 2, position % 2)
+
+    def coordinates_to_position(self, x: int, y: int, z: int, t: int)->int:
+        return x * 8 + y * 4 + z * 2 + t
+
     def set_cell(self, x, y, z, t, value):
         position = self.coordinates_to_position(x, y, z, t)
         self._array[position] = value

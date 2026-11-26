@@ -1,5 +1,4 @@
 from tesseract.board_view import BoardView
-from tesseract.tui.terminal import TerminalControl
 from tesseract.board_controller import BoardController
 
 
