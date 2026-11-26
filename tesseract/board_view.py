@@ -30,7 +30,7 @@ class BoardView:
     def draw_board_on_virtual_screen(self)->None:
         pass
         
-    def draw_virtual_screen(self)->None:
+    def draw_on_virtual_screen(self)->None:
         pass
 
     def is_legal(self, board_cmd: BoardCommand)->bool:
