@@ -2,40 +2,8 @@ from tesseract.board_model import BoardModel
 from enum import Enum
 from tesseract.board_controller import BoardController
 from tesseract.board_command import BoardCommand
-
-class TextualColor(Enum):
-    """
-    Basic colors that are supported in Linux terminal emulator
-    """
-    BLACK = 0
-    GREEN = 1
-    CYAN = 2
-    RED = 3
-    WHITE = 4
-
-class VirtualTextualScreen:
-    """
-    Textual representation of the screen
-    """
-
-    def __init__(self, height: int, width: int):
-        self._height = height
-        self._width = width
-        self._screen_matrix: list[list[tuple[str, TextualColor, TextualColor]]] = []
-        self.clear()
-        
-    def clear(self):
-        self._screen_matrix = [[(' ', TextualColor.BLACK, TextualColor.BLACK) for i in range(0, self._width)] for j in range(0, self._height)]
-
-    def set_cell(self, x: int, y: int, c: str, bg_color: TextualColor, fg_color: TextualColor)->None:
-        if x not in range(0, self._width):
-            raise Exception(f"cannot set x out of range: {x}")
-        if y not in range(0, self._height):
-            raise Exception(f"cannot set y out of range: {y}")
-        self._screen_matrix[y][x] = (c, bg_color, fg_color)
-        
-    def get_cell(self, x: int, y: int)->tuple[str, TextualColor, TextualColor]:
-        return self._screen_matrix[y][x]
+from tesseract.virtual_textual_screen import VirtualTextualScreen
+from tesseract.textual_color import TextualColor
 
 class BoardView:
     """
@@ -73,5 +41,8 @@ class BoardView:
         
     def report_illegal_command(self, board_cmd: BoardCommand)->None:
         pass
+        
+    def get_screen(self)->VirtualTextualScreen:
+        return self._screen
 
 
