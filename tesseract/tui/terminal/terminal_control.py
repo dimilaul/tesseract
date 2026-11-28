@@ -8,51 +8,63 @@ class TerminalControl:
 
     # ansi term colors
     BG_BLACK = "\033[40m"
+    BG_RED = "\033[41m"
     BG_GREEN = "\033[42m"
     BG_CYAN = "\033[46m"
+    BG_WHITE = "\033[47m"
+    BG_DEFAULT = "\033[49m"
     FG_RED = "\033[31m"
     FG_GREEN = "\033[33m"
     FG_CYAN = "\033[36m"
     FG_WHITE = "\033[37m"
     FG_BLACK = "\033[30m"
+    FG_DEFAULT = "\033[39m"
     TERMCOLOR_RESET = "\033[0m"
+
+    _BG_COLOR_COMMANDS = {
+        TextualColor.BLACK: BG_BLACK,
+        TextualColor.GREEN: BG_GREEN,
+        TextualColor.CYAN: BG_CYAN,
+        TextualColor.RED: BG_RED,
+        TextualColor.WHITE: BG_WHITE,
+    }
+
+    _FG_COLOR_COMMANDS = {
+        TextualColor.BLACK: FG_BLACK,
+        TextualColor.GREEN: FG_GREEN,
+        TextualColor.CYAN: FG_CYAN,
+        TextualColor.RED: FG_RED,
+        TextualColor.WHITE: FG_WHITE,
+    }
     
     def __init__(self):
         pass
     
     def background_color_to_terminal_command(self, color: TextualColor)->str:
-        if color == TextualColor.BLACK:
-            return self.BG_BLACK
-        if color == TextualColor.GREEN:
-            return self.BG_GREEN
-        if color == TextualColor.CYAN:
-            return self.BG_CYAN
-        return ""
+        return self._BG_COLOR_COMMANDS.get(color, "")
         
     def foreground_color_to_terminal_command(self, color: TextualColor)->str:
-        if color == TextualColor.RED:
-            return self.FG_RED
-        if color == TextualColor.GREEN:
-            return self.FG_GREEN
-        if color == TextualColor.CYAN:
-            return self.FG_CYAN
-        if color == TextualColor.BLACK:
-            return self.FG_BLACK
-
-        return ""
+        return self._FG_COLOR_COMMANDS.get(color, "")
 
     def surround_in_background(self, a_str: str, color: TextualColor)->str:
-        if color == TextualColor.BLACK:
+        cmd = self.background_color_to_terminal_command(color)
+        if not cmd:
             return a_str
-        return f"{self.background_color_to_terminal_command(color)}{a_str}{self.BG_BLACK}"
+        return f"{cmd}{a_str}{self.BG_DEFAULT}"
 
     def surround_in_foreground(self, a_str: str, color: TextualColor)->str:
-        if color == TextualColor.WHITE:
+        cmd = self.foreground_color_to_terminal_command(color)
+        if not cmd:
             return a_str
-        return f"{self.foreground_color_to_terminal_command(color)}{a_str}{self.FG_WHITE}"
+        return f"{cmd}{a_str}{self.FG_DEFAULT}"
+
+    def raise_lines(self, num_lines: int)->str:
+        if num_lines <= 0:
+            return ""
+        return f"\033[{num_lines}A"
         
     def get_header_line(self, height: int, background_color: TextualColor)->str:
-        header_line = f"\033[{height}A{self.background_color_to_terminal_command(background_color)}\r"
+        header_line = f"{self.raise_lines(height)}{self.background_color_to_terminal_command(background_color)}\r"
         return header_line
 
     def get_footer_line(self)->str:
