@@ -32,10 +32,9 @@ class VirtualScreenPilotView(BoardView):
 def main():
     view = VirtualScreenPilotView()
     
-    terminal_screen = TerminalScreen()
-    terminal_screen.draw_empty_screen(view.get_screen())
+    terminal_screen = TerminalScreen(view.get_screen())
     view.draw_on_virtual_screen()
-    terminal_screen.draw_screen(view.get_screen())
+    terminal_screen.draw_screen()
     
     keyboard_control = KeyboardControl()
     while True:
@@ -43,7 +42,7 @@ def main():
         if cmd != BoardCommand.NOP:
             view.process_command(cmd)
             view.draw_on_virtual_screen()
-            terminal_screen.draw_screen(view.get_screen())
+            terminal_screen.draw_screen()
     
 if __name__ == "__main__":
     main()
