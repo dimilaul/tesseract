@@ -29,6 +29,9 @@ class EventQueue:
         self._auto_dispatch = auto_dispatch
         self._dispatching = False
 
+    def set_auto_dispatch(self, auto_dispatch: bool) -> None:
+        self._auto_dispatch = auto_dispatch
+
     def subscribe(self, listener: Callable[[Any], None]) -> None:
         if listener not in self._listeners:
             self._listeners.append(listener)

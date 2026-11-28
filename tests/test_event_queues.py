@@ -18,8 +18,8 @@ from tesseract.virtual_textual_screen import VirtualTextualScreen
 
 
 class RecordingRenderer(ScreenRenderer):
-    def __init__(self, screen: VirtualTextualScreen, event_queue: EventQueue):
-        super().__init__(screen, event_queue)
+    def __init__(self, screen: VirtualTextualScreen):
+        super().__init__(screen)
         self.clear_calls = 0
         self.render_calls = 0
         self.snapshots = []
@@ -38,18 +38,22 @@ class RecordingRenderer(ScreenRenderer):
 
 class TestTwoEventQueues(unittest.TestCase):
     def test_controller_emits_model_changed_view_renders_screen_emits_screen_updated_renderer_renders(self):
-        model_queue = EventQueue()
-        screen_queue = EventQueue()
+        controller = VirtualScreenPilotController()
+        screen = VirtualTextualScreen(3, 3)
+        model_queue = controller.get_event_queue()
+        screen_queue = screen.get_event_queue()
 
         recorded_model_events = []
         recorded_screen_events = []
         model_queue.subscribe(recorded_model_events.append)
         screen_queue.subscribe(recorded_screen_events.append)
 
-        controller = VirtualScreenPilotController(model_queue)
-        screen = VirtualTextualScreen(3, 3, screen_queue)
-        renderer = RecordingRenderer(screen, screen_queue)
-        view = VirtualScreenPilotView(controller, screen, model_queue)
+        renderer = RecordingRenderer(screen)
+        view = VirtualScreenPilotView(controller, screen)
+
+        self.assertIs(view.get_event_queue(), model_queue)
+        self.assertIs(renderer.get_event_queue(), screen_queue)
+        self.assertIsNot(model_queue, screen_queue)
 
         # Renderer is only aware of screen, not view
         self.assertIs(renderer.get_screen(), screen)
@@ -77,12 +81,10 @@ class TestTwoEventQueues(unittest.TestCase):
         self.assertEqual(renderer.snapshots[-1][0][1][0], "0")
 
     def test_nop_and_blocked_move_do_not_emit_model_changed_event(self):
-        model_queue = EventQueue()
-        screen_queue = EventQueue()
-        controller = VirtualScreenPilotController(model_queue)
-        screen = VirtualTextualScreen(3, 3, screen_queue)
-        renderer = RecordingRenderer(screen, screen_queue)
-        VirtualScreenPilotView(controller, screen, model_queue)
+        controller = VirtualScreenPilotController()
+        screen = VirtualTextualScreen(3, 3)
+        renderer = RecordingRenderer(screen)
+        VirtualScreenPilotView(controller, screen)
 
         controller.process_command(BoardCommand.NOP)
         controller.process_command(BoardCommand.MOVE_UP)
@@ -91,13 +93,15 @@ class TestTwoEventQueues(unittest.TestCase):
         self.assertEqual(renderer.render_calls, 0)
 
     def test_manual_dispatch_two_event_queues(self):
-        model_queue = EventQueue(auto_dispatch=False)
-        screen_queue = EventQueue(auto_dispatch=False)
+        controller = VirtualScreenPilotController()
+        screen = VirtualTextualScreen(3, 3)
+        model_queue = controller.get_event_queue()
+        screen_queue = screen.get_event_queue()
+        model_queue.set_auto_dispatch(False)
+        screen_queue.set_auto_dispatch(False)
 
-        controller = VirtualScreenPilotController(model_queue)
-        screen = VirtualTextualScreen(3, 3, screen_queue)
-        renderer = RecordingRenderer(screen, screen_queue)
-        VirtualScreenPilotView(controller, screen, model_queue)
+        renderer = RecordingRenderer(screen)
+        VirtualScreenPilotView(controller, screen)
 
         controller.process_command(BoardCommand.MOVE_DOWN)
         # Queued in model_queue, not yet dispatched
@@ -119,30 +123,29 @@ class TestTwoEventQueues(unittest.TestCase):
         self.assertEqual(renderer.snapshots[-1][1][0][0], "0")
 
     def test_terminal_screen_renderer_listens_to_screen_queue(self):
-        model_queue = EventQueue()
-        screen_queue = EventQueue()
-
-        controller = VirtualScreenPilotController(model_queue)
-        screen = VirtualTextualScreen(3, 3, screen_queue)
+        controller = VirtualScreenPilotController()
+        screen = VirtualTextualScreen(3, 3)
 
         buf = io.StringIO()
         with redirect_stdout(buf):
-            renderer = TerminalScreenRenderer(screen, screen_queue)
-            VirtualScreenPilotView(controller, screen, model_queue)
+            renderer = TerminalScreenRenderer(screen)
+            VirtualScreenPilotView(controller, screen)
             controller.process_command(BoardCommand.MOVE_RIGHT)
 
         output = buf.getvalue()
         self.assertIs(renderer.get_screen(), screen)
+        self.assertIs(renderer.get_event_queue(), screen.get_event_queue())
         self.assertIn("0", output)
 
     def test_base_classes_work_with_default_queues(self):
         model = BoardModel(2, 2, 2, 2)
         controller = BoardController(model)
         screen = VirtualTextualScreen(2, 2)
-        renderer = RecordingRenderer(screen, screen.get_event_queue())
+        renderer = RecordingRenderer(screen)
         view = BoardView(controller, screen)
 
         self.assertIs(view.get_event_queue(), controller.get_event_queue())
+        self.assertIs(renderer.get_event_queue(), screen.get_event_queue())
         self.assertIsNot(controller.get_event_queue(), screen.get_event_queue())
 
         controller.emit_model_changed()

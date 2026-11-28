@@ -7,9 +7,9 @@ from tesseract.virtual_textual_screen import VirtualTextualScreen
 class ScreenRenderer:
     """Base renderer listening to ScreenUpdatedEvent on a screen event queue."""
 
-    def __init__(self, screen: VirtualTextualScreen, event_queue: Optional[EventQueue] = None):
+    def __init__(self, screen: VirtualTextualScreen):
         self._screen = screen
-        self._event_queue = event_queue if event_queue is not None else screen.get_event_queue()
+        self._event_queue = screen.get_event_queue()
         if self._event_queue is not None:
             self._event_queue.subscribe(self._on_screen_updated)
 

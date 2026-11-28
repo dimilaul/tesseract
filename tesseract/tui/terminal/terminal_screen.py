@@ -1,14 +1,11 @@
 
-from typing import Optional
-
-from tesseract.event_queue import EventQueue
 from tesseract.virtual_textual_screen import VirtualTextualScreen
 from tesseract.tui.terminal.terminal_control import TerminalControl
 from tesseract.screen_renderer import ScreenRenderer
 
 class TerminalScreenRenderer(ScreenRenderer):
-    def __init__(self, screen: VirtualTextualScreen, event_queue: Optional[EventQueue] = None):
-        super().__init__(screen, event_queue)
+    def __init__(self, screen: VirtualTextualScreen):
+        super().__init__(screen)
         self._terminal_control = TerminalControl()
         self.clear()
 

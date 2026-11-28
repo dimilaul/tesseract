@@ -3,7 +3,6 @@ from typing import Optional
 from tesseract.board_model import BoardModel
 from tesseract.board_controller import BoardController
 from tesseract.board_view import BoardView, VirtualTextualScreen
-from tesseract.event_queue import EventQueue
 from tesseract.tui.terminal.terminal_control import TerminalControl
 from tesseract.tui.terminal.terminal_screen import TerminalScreenRenderer
 from tesseract.tui.keyboard_control import KeyboardControl
@@ -45,8 +44,8 @@ class VirtualScreenPilotModel(BoardModel):
 
         
 class VirtualScreenPilotController(BoardController):
-    def __init__(self, event_queue: Optional[EventQueue] = None):
-        super().__init__(VirtualScreenPilotModel(), event_queue)
+    def __init__(self):
+        super().__init__(VirtualScreenPilotModel())
         
     def is_legal(self, board_cmd: BoardCommand)->bool:
         if board_cmd == BoardCommand.NOP:
@@ -92,11 +91,10 @@ class VirtualScreenPilotView(BoardView):
         self,
         board_controller: Optional[BoardController] = None,
         virtual_screen: Optional[VirtualTextualScreen] = None,
-        event_queue: Optional[EventQueue] = None,
     ):
         controller = board_controller if board_controller is not None else VirtualScreenPilotController()
         screen = virtual_screen if virtual_screen is not None else VirtualTextualScreen(3, 3)
-        super().__init__(controller, screen, 0, 0, 0, 0, event_queue=event_queue)
+        super().__init__(controller, screen, 0, 0, 0, 0)
         
     def _render_board(self):
         char_value = chr(ord('0') + self._board_controller.get_board_model().get_cell(0,0,0,0))
@@ -108,14 +106,10 @@ class VirtualScreenPilotView(BoardView):
                     self._screen.set_cell(x, y, ' ', TextualColor.BLACK, TextualColor.WHITE)
 
 def main():
-    model_event_queue = EventQueue()
-    screen_event_queue = EventQueue()
-
-    controller = VirtualScreenPilotController(model_event_queue)
-    screen = VirtualTextualScreen(3, 3, screen_event_queue)
-    TerminalScreenRenderer(screen, screen_event_queue)
-    view = VirtualScreenPilotView(controller, screen, model_event_queue)
-
+    controller = VirtualScreenPilotController()
+    screen = VirtualTextualScreen(3, 3)
+    terminal_renderer = TerminalScreenRenderer(screen)
+    view = VirtualScreenPilotView(controller, screen)
     view.render()
     
     keyboard_control = KeyboardControl()
