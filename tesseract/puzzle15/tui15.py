@@ -10,6 +10,7 @@ from tesseract.puzzle15.puzzle15_board_controller import Puzzle15BoardController
 from tesseract.board_command import BoardCommand
 from tesseract.tui.keyboard_control import KeyboardControl
 from tesseract.tui.terminal.terminal_control import TerminalControl
+from tesseract.textual_color import TextualColor
 
 tabulate.PRESERVE_WHITESPACE = True
 
@@ -20,6 +21,8 @@ DEFAULT_DIMENSIONS = [4, 4, 4, 4]
 model = None
 controller = None
 view = None
+
+term_control = TerminalControl()
 
 def number_to_string(array, idx):
     num = array[idx]
@@ -49,10 +52,13 @@ def draw_empty_board():
         print()
 
 def draw_board(array, status):
-    if_solved = ""
+    bg_color = TextualColor.BLACK
     if status == Puzzle15BoardStatus.STATUS_SOLVED:
-        if_solved = TerminalControl.BG_CYAN
-    print(f"\033[{TerminalControl.BOARD_TUI_HEIGHT + 1}A{if_solved}\r")
+        bg_color = TextualColor.CYAN
+
+    header_line = term_control.get_header_line(TerminalControl.BOARD_TUI_HEIGHT + 1, bg_color)
+    footer_line = term_control.get_footer_line()
+    print(header_line)
     sub1 = [[number_to_string(array,  0), number_to_string(array,  1)], [number_to_string(array,  2), number_to_string(array,  3)]]
     sub2 = [[number_to_string(array,  4), number_to_string(array,  5)], [number_to_string(array,  6), number_to_string(array,  7)]]
     sub3 = [[number_to_string(array,  8), number_to_string(array,  9)], [number_to_string(array, 10), number_to_string(array, 11)]]
@@ -77,7 +83,7 @@ def draw_board(array, status):
     print("                          ")
     for line in bottom_row:
         print(line)
-    print(TerminalControl.TERMCOLOR_RESET)
+    print(footer_line)
 
 def array_position_to_coordinates(position: int)->tuple[int, int, int, int]:
     return model.position_to_coordinates(position)

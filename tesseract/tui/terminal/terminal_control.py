@@ -22,33 +22,40 @@ class TerminalControl:
     
     def background_color_to_terminal_command(self, color: TextualColor)->str:
         if color == TextualColor.BLACK:
-            return BG_BLACK
+            return self.BG_BLACK
         if color == TextualColor.GREEN:
-            return BG_GREEN
-        if color == TextualColor.BG_CYAN:
-            return BG_CYAN
+            return self.BG_GREEN
+        if color == TextualColor.CYAN:
+            return self.BG_CYAN
         return ""
         
-    def foreground_color_to_terminal_command(color: TextualColor)->str:
+    def foreground_color_to_terminal_command(self, color: TextualColor)->str:
         if color == TextualColor.RED:
-            return FG_RED
+            return self.FG_RED
         if color == TextualColor.GREEN:
-            return FG_GREEN
+            return self.FG_GREEN
         if color == TextualColor.CYAN:
-            return FG_CYAN
+            return self.FG_CYAN
         if color == TextualColor.BLACK:
-            return FG_BLACK
+            return self.FG_BLACK
 
         return ""
 
     def surround_in_background(self, a_str: str, color: TextualColor)->str:
         if color == TextualColor.BLACK:
             return a_str
-        return f"{self.background_color_to_terminal_command(color)}{a_str}{BG_BLACK}"
+        return f"{self.background_color_to_terminal_command(color)}{a_str}{self.BG_BLACK}"
 
     def surround_in_foreground(self, a_str: str, color: TextualColor)->str:
         if color == TextualColor.WHITE:
             return a_str
-        return f"{self.forreground_color_to_terminal_command(color)}{a_str}{FG_WHITE}"
+        return f"{self.foreground_color_to_terminal_command(color)}{a_str}{self.FG_WHITE}"
         
-        
+    def get_header_line(self, height: int, background_color: TextualColor)->str:
+        header_line = f"\033[{height}A{self.background_color_to_terminal_command(background_color)}\r"
+        return header_line
+
+    def get_footer_line(self)->str:
+        footer_line = self.TERMCOLOR_RESET
+        return footer_line
+

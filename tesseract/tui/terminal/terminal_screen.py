@@ -1,3 +1,7 @@
+
+from tesseract.virtual_textual_screen import VirtualTextualScreen
+
+
 class TerminalScreen:
     def __init__(self, screen: VirtualTextualScreen):
         self._screen = screen
