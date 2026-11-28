@@ -1,19 +1,23 @@
 
+from typing import Optional
+
+from tesseract.event_queue import EventQueue
 from tesseract.virtual_textual_screen import VirtualTextualScreen
 from tesseract.tui.terminal.terminal_control import TerminalControl
+from tesseract.screen_renderer import ScreenRenderer
 
-class TerminalScreen:
-    def __init__(self, screen: VirtualTextualScreen):
-        self._screen = screen
+class TerminalScreenRenderer(ScreenRenderer):
+    def __init__(self, screen: VirtualTextualScreen, event_queue: Optional[EventQueue] = None):
+        super().__init__(screen, event_queue)
         self._terminal_control = TerminalControl()
-        self.draw_empty_screen()
+        self.clear()
 
-    def draw_empty_screen(self)->None:
+    def clear(self)->None:
         screen_height = self._screen.get_height()
         for i in range(screen_height):
             print()
             
-    def draw_screen(self)->None:
+    def render(self)->None:
         height = self._screen.get_height()
         if height > 0:
             print(self._terminal_control.raise_lines(height), end="\r")
